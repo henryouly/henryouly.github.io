@@ -25,6 +25,7 @@
             var update = function() {
                 fetch('http://192.168.30.4:4048/1/summary');
                 fetch('http://52.229.61.246:4048/1/summary');
+                fetch('http://40.71.23.129:4048/1/summary');
             };
             this.interval = $interval(update, 5000);
             update();
@@ -58,7 +59,7 @@
           <td>{{miner.resources.memory.free / 1000000000 | number: 1}}
               / {{miner.resources.memory.total / 1000000000 | number: 1}}</td>
           <td>{{miner.hugepages}}</td>
-          <td>{{miner.cpu.cores}}/{{miner.cpu.threads}}</td>
+          <td>{{miner.cpu.cores}}C/{{miner.cpu.threads}}T</td>
           <td>{{miner.cpu.brand}}</td>
           <td>{{miner.ua}}</td>
         </tr>
