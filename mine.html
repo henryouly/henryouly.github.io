@@ -37,6 +37,7 @@
       <table class="table table-striped w-auto small">
         <tr>
           <th>Worker</th>
+          <th>Pool</th>
           <th>Hashrate</th>
           <th>Share</th>
           <th>Algo</th>
@@ -50,6 +51,7 @@
         </tr>
         <tr ng-repeat="miner in minerArray">
           <td>{{miner.worker_id}}</td>
+          <td>{{miner.connection.pool}}</td>
           <td>{{miner.hashrate["total"][0]}} H/s</td>
           <td>{{miner.results.shares_good}}/{{miner.results.shares_total}}</td>
           <td>{{miner.algo}}</td>
