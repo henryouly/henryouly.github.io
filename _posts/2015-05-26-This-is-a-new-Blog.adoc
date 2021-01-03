@@ -1,4 +1,0 @@
-= This is a new Blog
-:hp-tags: new, testing, blog
-
-This is a test for a new blog post.
