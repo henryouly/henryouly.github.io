@@ -26,11 +26,11 @@
             quantBytes: 2
         },
         singlePoseDetection: {
-            minPoseConfidence: 0.1,
+            minPoseConfidence: 0.3,
             minPartConfidence: 0.5,
         },
         multiPoseDetection: {
-            maxPoseDetections: 5,
+            maxPoseDetections: 1,
             minPoseConfidence: 0.15,
             minPartConfidence: 0.1,
             nmsRadius: 30.0,
@@ -153,7 +153,7 @@
         const ctx = canvas.getContext('2d');
         const ctx_mini = canvas_mini.getContext('2d');
         // since images are being fed from a webcam
-        const flipHorizontal = true;
+        const flipPoseHorizontal = true;
 
         canvas.width = videoWidth;
         canvas.height = videoHeight;
@@ -186,7 +186,7 @@
             switch (guiState.algorithm) {
                 case 'single-pose':
                     const pose = await guiState.net.estimatePoses(video, {
-                      flipHorizontal: flipHorizontal,
+                      flipHorizontal: flipPoseHorizontal,
                       decodingMethod: 'single-person'
                     });
                     poses = poses.concat(pose);
