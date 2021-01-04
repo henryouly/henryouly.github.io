@@ -22,12 +22,12 @@
         input: {
             architecture: 'ResNet50',
             outputStride: 32,
-            inputResolution: {width: 257, height: 200},
+            inputResolution: {width: 200, height: 150},
             quantBytes: 2
         },
         singlePoseDetection: {
-            minPoseConfidence: 0.5,
-            minPartConfidence: 0.1,
+            minPoseConfidence: 0.1,
+            minPartConfidence: 0.5,
         },
         multiPoseDetection: {
             maxPoseDetections: 5,
@@ -42,6 +42,7 @@
             showBoundingBox: false,
         },
         net: null,
+        hand: "right",
     };
 
     // Pose Dragger
@@ -59,6 +60,21 @@
             this.events[event].apply(this, data);
         };
     };
+
+    function setupGui(cameras, net) {
+      guiState.net = net;
+
+      if (cameras.length > 0) {
+        guiState.camera = cameras[0].deviceId;
+      }
+
+      const gui = new dat.GUI({width: 300});
+      const handController =
+          gui.add(guiState, 'hand', ['left', 'right']);
+      handController.onChange(function(hand) {
+        guiState.changeToHand = hand;
+      });
+    }
 
     var PersonDragger = function(){
         this.left = new PoseDragger();
@@ -121,12 +137,7 @@
     }
 
     function getHand(){
-        var radios = document.getElementsByName("hand");
-        for(var i = 0; i < radios.length; i++){
-            if(radios[i].checked){
-                return radios[i].value;
-            }
-        }
+        return guiState.hand;
     }
 
     function detectPoseInRealTime(video, net) {
@@ -170,9 +181,11 @@
             let minPartConfidence;
             switch (guiState.algorithm) {
                 case 'single-pose':
-                    const pose = await guiState.net.estimateSinglePose(
-                        video, {flipHorizontal: true});
-                    poses.push(pose);
+                    const pose = await guiState.net.estimateSinglePose(video, {
+                      flipHorizontal: flipHorizontal,
+                      decodingMethod: 'single-person'
+                    });
+                    poses = poses.concat(pose);
 
                     minPoseConfidence = +guiState.singlePoseDetection.minPoseConfidence;
                     minPartConfidence = +guiState.singlePoseDetection.minPartConfidence;
@@ -545,7 +558,7 @@
         showInfo("正在加载 posenet 模型...");
         const net = await posenet.load(guiState.input);
         showInfo("posenet 模型加载完毕");
-        guiState.net = net;
+        setupGui([], net);
 
         // document.getElementById('loading').style.display = 'none';
         document.getElementById('main').style.display = 'block';
