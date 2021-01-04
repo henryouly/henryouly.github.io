@@ -41,8 +41,8 @@
             showPoints: true,
             showBoundingBox: false,
         },
+        hand: 'right',
         net: null,
-        hand: "right",
     };
 
     // Pose Dragger
@@ -69,11 +69,15 @@
       }
 
       const gui = new dat.GUI({width: 300});
-      const handController =
-          gui.add(guiState, 'hand', ['left', 'right']);
-      handController.onChange(function(hand) {
-        guiState.changeToHand = hand;
-      });
+
+      const handController = gui.add(guiState, 'hand', ['left', 'right']);
+
+      let output = gui.addFolder('Output');
+      output.add(guiState.output, 'showVideo');
+      output.add(guiState.output, 'showSkeleton');
+      output.add(guiState.output, 'showPoints');
+      output.add(guiState.output, 'showBoundingBox');
+      output.open();
     }
 
     var PersonDragger = function(){
@@ -181,7 +185,7 @@
             let minPartConfidence;
             switch (guiState.algorithm) {
                 case 'single-pose':
-                    const pose = await guiState.net.estimateSinglePose(video, {
+                    const pose = await guiState.net.estimatePoses(video, {
                       flipHorizontal: flipHorizontal,
                       decodingMethod: 'single-person'
                     });
@@ -191,12 +195,15 @@
                     minPartConfidence = +guiState.singlePoseDetection.minPartConfidence;
                     break;
                 case 'multi-pose':
-                    poses = await guiState.net.estimateMultiplePoses(
-                        video, imageScaleFactor, flipHorizontal, outputStride,
-                        guiState.multiPoseDetection.maxPoseDetections,
-                        guiState.multiPoseDetection.minPartConfidence,
-                        guiState.multiPoseDetection.nmsRadius);
+                    let all_poses = await guiState.net.estimatePoses(video, {
+                        flipHorizontal: flipPoseHorizontal,
+                        decodingMethod: 'multi-person',
+                        maxDetections: guiState.multiPoseDetection.maxPoseDetections,
+                        scoreThreshold: guiState.multiPoseDetection.minPartConfidence,
+                        nmsRadius: guiState.multiPoseDetection.nmsRadius
+                    });
 
+                    poses = poses.concat(all_poses);
                     minPoseConfidence = +guiState.multiPoseDetection.minPoseConfidence;
                     minPartConfidence = +guiState.multiPoseDetection.minPartConfidence;
                     break;
